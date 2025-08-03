@@ -191,6 +191,42 @@
             z-index: 1002;
         }
         .close-button:hover {color: #ccc;}
+        .whitelist-check {
+            margin: 20px 0;
+            text-align: center;
+            z-index: 10;
+        }
+        .wallet-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #fff;
+            border-radius: 5px;
+            background-color: #222;
+            color: #fff;
+            font-family: 'Bulbasaur SP', sans-serif;
+            font-size: 1em;
+            box-sizing: border-box;
+        }
+        .wallet-input::placeholder {
+            color: #aaa;
+        }
+        #check-wallet {
+            width: 100%;
+            max-width: 200px;
+        }
+        #whitelist-result {
+            color: #fff;
+            font-size: 1.2em;
+            margin-top: 15px;
+        }
+        #whitelist-result.success {
+            color: #33cc33;
+        }
+        #whitelist-result.error {
+            color: #ff0000;
+        }
         @media (max-width: 768px) {
             .button {font-size: 3vw; padding: 8px 15px;}
             .title {font-size: 8vw;}
@@ -199,6 +235,9 @@
             .modal-title {font-size: 5vw;}
             .modal-text {font-size: 1em;}
             .modal-details {font-size: 0.9em;}
+            .wallet-input { font-size: 0.9em; max-width: 90%; }
+            #whitelist-result { font-size: 1em; }
+            #check-wallet { font-size: 3vw; }
         }
         @media (max-width: 480px) {
             .button {font-size: 4vw; padding: 6px 12px;}
@@ -209,6 +248,9 @@
             .modal-text {font-size: 0.9em;}
             .modal-details {font-size: 0.8em;}
             .modal-content {padding: 15px;}
+            .wallet-input { font-size: 0.8em; max-width: 90%; }
+            #whitelist-result { font-size: 0.9em; }
+            #check-wallet { font-size: 4vw; }
         }
     </style>
 </head>
@@ -221,6 +263,12 @@
     </div>
     <div class="title">DRIP PUNKS</div>
     <div class="subtitle">[coming soon]</div>
+    <div class="whitelist-check">
+        <h3 class="modal-title">Check Whitelist</h3>
+        <input type="text" id="wallet-input" class="wallet-input" placeholder="Enter wallet address (0x...)" />
+        <button class="button" id="check-wallet">Check</button>
+        <p id="whitelist-result" class="modal-text"></p>
+    </div>
     <div class="modal" id="info-modal">
         <div class="modal-content">
             <span class="close-button" id="close-modal">×</span>
@@ -279,6 +327,69 @@
                     modal.style.display = 'none';
                     document.body.style.overflow = '';
                 }, 300);
+            }
+        });
+
+        // Функция для загрузки и парсинга CSV
+        async function loadCSV(file) {
+            try {
+                const response = await fetch(file);
+                if (!response.ok) throw new Error(`Failed to load ${file}`);
+                const text = await response.text();
+                const rows = text.trim().split('\n').map(row => {
+                    const [wallet, amount] = row.split(',').map(str => str.trim());
+                    return { wallet: wallet.toLowerCase(), amount: parseInt(amount) || 0 };
+                });
+                return rows;
+            } catch (error) {
+                console.error('Error loading CSV:', error);
+                return [];
+            }
+        }
+
+        // Функция проверки кошелька
+        async function checkWallet() {
+            const walletInput = document.getElementById('wallet-input').value.trim().toLowerCase();
+            const resultElement = document.getElementById('whitelist-result');
+            
+            if (!walletInput.startsWith('0x') || walletInput.length !== 42) {
+                resultElement.textContent = 'Please enter a valid wallet address';
+                resultElement.className = 'modal-text error';
+                return;
+            }
+
+            // Загружаем оба CSV
+            const gtdList = await loadCSV('data/GTD.csv');
+            const fcfsList = await loadCSV('data/FCFS.csv');
+
+            // Проверяем GTD
+            const gtdEntry = gtdList.find(entry => entry.wallet === walletInput);
+            if (gtdEntry) {
+                resultElement.textContent = `Guaranteed WL Spot (Amount: ${gtdEntry.amount})`;
+                resultElement.className = 'modal-text success';
+                return;
+            }
+
+            // Проверяем FCFS
+            const fcfsEntry = fcfsList.find(entry => entry.wallet === walletInput);
+            if (fcfsEntry) {
+                resultElement.textContent = `FCFS Spot (Amount: ${fcfsEntry.amount})`;
+                resultElement.className = 'modal-text success';
+                return;
+            }
+
+            // Не найдено
+            resultElement.textContent = 'Not in whitelist';
+            resultElement.className = 'modal-text error';
+        }
+
+        // Добавляем обработчик для кнопки проверки
+        document.getElementById('check-wallet').addEventListener('click', checkWallet);
+
+        // Обработка Enter в поле ввода
+        document.getElementById('wallet-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkWallet();
             }
         });
     </script>
