@@ -64,7 +64,9 @@
             -webkit-text-stroke: 1px #fff;
             color: transparent;
             background-color: transparent;
-            text-shadow: none;
+            border: none;
+            padding: 12px 24px;
+            transition: transform 0.3s;
         }
         #check-wallet:hover {
             background-color: transparent;
@@ -383,28 +385,21 @@
             const gtdList = await loadCSV('data/GTD.csv');
             const fcfsList = await loadCSV('data/FCFS.csv');
 
-            // Проверяем GTD
+            // Проверяем GTD и FCFS
             const gtdEntry = gtdList.find(entry => entry.wallet === walletInput);
-            if (gtdEntry) {
-                console.log(`Found in GTD: Amount ${gtdEntry.amount}`);
-                resultElement.textContent = `Guaranteed WL Spot (Amount: ${gtdEntry.amount})`;
-                resultElement.className = 'modal-text success show';
-                return;
-            }
-
-            // Проверяем FCFS
             const fcfsEntry = fcfsList.find(entry => entry.wallet === walletInput);
-            if (fcfsEntry) {
-                console.log(`Found in FCFS: Amount ${fcfsEntry.amount}`);
-                resultElement.textContent = `FCFS Spot (Amount: ${fcfsEntry.amount})`;
-                resultElement.className = 'modal-text success show';
-                return;
-            }
+            const gtdAmount = gtdEntry ? gtdEntry.amount : 0;
+            const fcfsAmount = fcfsEntry ? fcfsEntry.amount : 0;
 
-            // Не найдено
-            console.log('Wallet not found in whitelists');
-            resultElement.textContent = 'Not in whitelist';
-            resultElement.className = 'modal-text error show';
+            if (gtdAmount > 0 || fcfsAmount > 0) {
+                console.log(`Found: GTD=${gtdAmount}, FCFS=${fcfsAmount}`);
+                resultElement.textContent = `GTD SPOTS: ${gtdAmount}, FCFS: ${fcfsAmount}`;
+                resultElement.className = 'modal-text success show';
+            } else {
+                console.log('Wallet not found in whitelists');
+                resultElement.textContent = 'Not in whitelist';
+                resultElement.className = 'modal-text error show';
+            }
         }
 
         // Добавляем обработчик для кнопки проверки
