@@ -59,6 +59,17 @@
             background-color: rgba(255, 255, 255, 0.2);
             transform: scale(1.1);
         }
+        #check-wallet {
+            font-size: 1.5vw;
+            -webkit-text-stroke: 1px #fff;
+            color: transparent;
+            background-color: transparent;
+            text-shadow: none;
+        }
+        #check-wallet:hover {
+            background-color: transparent;
+            transform: scale(1.1);
+        }
         .title {
             font-size: 10vw;
             text-align: center;
@@ -115,6 +126,13 @@
             color: #fff;
             font-size: 1.2em;
             margin-top: 15px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        #whitelist-result.show {
+            opacity: 1;
+            transform: translateY(0);
         }
         #whitelist-result.success {
             color: #33cc33;
@@ -223,6 +241,7 @@
         .close-button:hover {color: #ccc;}
         @media (max-width: 768px) {
             .button {font-size: 3vw; padding: 8px 15px;}
+            #check-wallet {font-size: 2.5vw;}
             .title {font-size: 8vw;}
             .whitelist-check {font-size: 4vw;}
             .falling-object {width: 30px; height: 30px;}
@@ -231,10 +250,10 @@
             .modal-details {font-size: 0.9em;}
             .wallet-input { font-size: 0.9em; max-width: 90%; }
             #whitelist-result { font-size: 1em; }
-            #check-wallet { font-size: 3vw; }
         }
         @media (max-width: 480px) {
             .button {font-size: 4vw; padding: 6px 12px;}
+            #check-wallet {font-size: 3.5vw;}
             .title {font-size: 10vw;}
             .whitelist-check {font-size: 5vw;}
             .falling-object {width: 20px; height: 20px;}
@@ -244,7 +263,6 @@
             .modal-content {padding: 15px;}
             .wallet-input { font-size: 0.8em; max-width: 90%; }
             #whitelist-result { font-size: 0.9em; }
-            #check-wallet { font-size: 4vw; }
         }
     </style>
 </head>
@@ -356,7 +374,7 @@
             if (!walletInput.startsWith('0x') || walletInput.length !== 42) {
                 console.log('Invalid wallet address');
                 resultElement.textContent = 'Please enter a valid wallet address';
-                resultElement.className = 'modal-text error';
+                resultElement.className = 'modal-text error show';
                 return;
             }
 
@@ -370,7 +388,7 @@
             if (gtdEntry) {
                 console.log(`Found in GTD: Amount ${gtdEntry.amount}`);
                 resultElement.textContent = `Guaranteed WL Spot (Amount: ${gtdEntry.amount})`;
-                resultElement.className = 'modal-text success';
+                resultElement.className = 'modal-text success show';
                 return;
             }
 
@@ -379,14 +397,14 @@
             if (fcfsEntry) {
                 console.log(`Found in FCFS: Amount ${fcfsEntry.amount}`);
                 resultElement.textContent = `FCFS Spot (Amount: ${fcfsEntry.amount})`;
-                resultElement.className = 'modal-text success';
+                resultElement.className = 'modal-text success show';
                 return;
             }
 
             // Не найдено
             console.log('Wallet not found in whitelists');
             resultElement.textContent = 'Not in whitelist';
-            resultElement.className = 'modal-text error';
+            resultElement.className = 'modal-text error show';
         }
 
         // Добавляем обработчик для кнопки проверки
