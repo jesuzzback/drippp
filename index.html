@@ -28,6 +28,23 @@
             align-items: center;
             overflow-x: hidden;
             font-family: 'Bulbasaur SP', sans-serif;
+            transition: background-color 0.5s ease;
+        }
+        body.flash-green {
+            animation: flash-green 1s ease;
+        }
+        body.flash-red {
+            animation: flash-red 1s ease;
+        }
+        @keyframes flash-green {
+            0% { background-color: #000; }
+            50% { background-color: #33cc33; }
+            100% { background-color: #000; }
+        }
+        @keyframes flash-red {
+            0% { background-color: #000; }
+            50% { background-color: #ff0000; }
+            100% { background-color: #000; }
         }
         #falling-objects-container {
             position: fixed;
@@ -371,12 +388,15 @@
             console.log('Check button clicked');
             const walletInput = document.getElementById('wallet-input').value.trim().toLowerCase();
             const resultElement = document.getElementById('whitelist-result');
+            const body = document.body;
             
             console.log(`Checking wallet: ${walletInput}`);
             if (!walletInput.startsWith('0x') || walletInput.length !== 42) {
                 console.log('Invalid wallet address');
                 resultElement.textContent = 'Please enter a valid wallet address';
                 resultElement.className = 'modal-text error show';
+                body.className = 'flash-red';
+                setTimeout(() => { body.className = ''; }, 1000);
                 return;
             }
 
@@ -395,11 +415,14 @@
                 console.log(`Found: GTD=${gtdAmount}, FCFS=${fcfsAmount}`);
                 resultElement.textContent = `GTD SPOTS: ${gtdAmount}, FCFS: ${fcfsAmount}`;
                 resultElement.className = 'modal-text success show';
+                body.className = 'flash-green';
             } else {
                 console.log('Wallet not found in whitelists');
                 resultElement.textContent = 'Not in whitelist';
                 resultElement.className = 'modal-text error show';
+                body.className = 'flash-red';
             }
+            setTimeout(() => { body.className = ''; }, 1000);
         }
 
         // Добавляем обработчик для кнопки проверки
