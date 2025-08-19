@@ -322,7 +322,7 @@
             object.className = 'falling-object';
             object.style.left = Math.random() * window.innerWidth + 'px';
             object.style.animationDuration = Math.random() * 5 + 3 + 's';
-            object.style.opacity = Math.random() * 0.8 + 0.8;
+            object.style.opacity = 0.8;
             container.appendChild(object);
             object.addEventListener('animationend', () => object.remove());
         }
